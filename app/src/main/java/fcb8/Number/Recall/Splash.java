@@ -12,14 +12,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import fcb8.Number.Recall.Repository.Animations;
-import fcb8.Number.Recall.Repository.FBFetch;
 import fcb8.Number.Recall.Repository.IntConnection;
 import fcb8.Number.Recall.databinding.ActivitySplashBinding;
 
 public class Splash extends AppCompatActivity {
     private ActivitySplashBinding binding;
     private Animations TheAnimation;
-    private FBFetch LoadFB;
     private IntConnection GMInternet;
     private String FSStatus, URLStatus, url;
     boolean HadInternetConnection, NoInternetConnection;
@@ -32,40 +30,17 @@ public class Splash extends AppCompatActivity {
 
         TheAnimation = new Animations(this);
 
-        LoadFB = new FBFetch();
         GMInternet = new IntConnection(this);
         HadInternetConnection = GMInternet.getInternetConnection();
         LoadApp();
     }
 
     private void LoadApp() {
-        LoadFB.addSnapshotListener((value, error) -> {
-            if (value != null) {
-                FSStatus = LoadFB.getFSStatus(value);
-                URLStatus = LoadFB.getURLStatus(value);
-                url = LoadFB.getUrl(value);
-
-                if (HadInternetConnection) {
-                    if (FSStatus.equals(URLStatus)) {
-                        LoadT();
-                    } else {
-                        LoadF();
-                    }
-                } else {
-                    NoInternetConnection = GMInternet.getNoInternetConnection();
-                }
-            }
-        });
-    }
-
-    private void LoadT() {
-        binding.SplashLogo.setVisibility(View.VISIBLE);
-        TheAnimation.getScaleAnimation(binding.SplashLogo);
-        Handler delayHandler = new Handler();
-        delayHandler.postDelayed(() -> {
-            binding.GameWeb.setVisibility(View.VISIBLE);
-            DW(url);
-        }, 700);
+        if (HadInternetConnection) {
+            LoadF();
+        } else {
+            NoInternetConnection = GMInternet.getNoInternetConnection();
+        }
     }
 
     private void LoadF() {
@@ -78,21 +53,6 @@ public class Splash extends AppCompatActivity {
             finish();
         }, 700);
     }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void DW(String url) {
-        binding.GameWeb.clearHistory();
-        binding.GameWeb.getSettings().setJavaScriptEnabled(true);
-        binding.GameWeb.getSettings().setDomStorageEnabled(true);
-        binding.GameWeb.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        binding.GameWeb.loadUrl(url);
-        binding.GameWeb.setWebViewClient(new WebViewClient());
-
-        if (FSStatus.equals(URLStatus)) {
-            binding.GameWeb.setWebViewClient(new WebViewClient());
-        }
-    }
-
 
     private void CustomDialog() {
         new AlertDialog.Builder(this)
